@@ -11,14 +11,12 @@ gem 'sqlite3'
 gem 'em-http-request'
 gem "uuid", "~> 2.3.5"
 gem 'yajl-ruby'
-gem 'pubnub', "3.3.0.7"
+gem 'pubnub', "3.3.0.8"
 gem 'linecache19'
 gem 'ruby_core_source'
 gem 'ruby-debug19'
 gem 'ruby-debug-base19'
 gem 'httparty'
-gem 'passenger'
-
 
 # Gems used only for assets and not required
 # in production environments by default.

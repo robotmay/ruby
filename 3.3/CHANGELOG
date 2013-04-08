@@ -1,3 +1,6 @@
+04-08-13
+. added sync publish option via :sync_http on Pubnub.new
+
 03-21-13
 . use system-specific temp dir
 . explicitly require json -- needed for non-rails applications

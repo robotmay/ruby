@@ -21,11 +21,11 @@ require 'em-http-request'
 require 'yajl'
 require 'json'
 require 'uuid'
+require 'httparty'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/string/inflections'
 require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/object/blank'
-
 
 class Pubnub
 
@@ -50,7 +50,7 @@ class Pubnub
   class InitError < RuntimeError;
   end
 
-  attr_accessor :publish_key, :subscribe_key, :secret_key, :cipher_key, :ssl, :channel, :origin, :session_uuid
+  attr_accessor :publish_key, :subscribe_key, :secret_key, :cipher_key, :ssl, :channel, :origin, :session_uuid, :sync_http
 
   ORIGIN_HOST = 'pubsub.pubnub.com'
   #ORIGIN_HOST = 'test.pubnub.com'
@@ -73,6 +73,7 @@ class Pubnub
       @secret_key = options_hash[:secret_key].blank? ? nil : options_hash[:secret_key].to_s
       @cipher_key = options_hash[:cipher_key].blank? ? nil : options_hash[:cipher_key].to_s
       @ssl = options_hash[:ssl].blank? ? false : true
+      @sync_http = options_hash[:sync_http].blank? ? false : true
 
     else
       raise(InitError, "Initialize with either a hash of options, or exactly 5 named parameters.")
@@ -107,7 +108,12 @@ class Pubnub
 
     publish_request.format_url!
 
-    check_for_em publish_request
+    if sync_http
+      sync_request(publish_request)
+    else
+      check_for_em publish_request
+    end
+
   end
 
   def subscribe(options)
@@ -279,6 +285,22 @@ class Pubnub
   end
 
   private
+
+  def sync_request(request)
+
+    begin
+      response = HTTParty.get(request.url, :headers => {'V' => '3.3.0.8sync', 'User-Agent' => 'Ruby', 'Accept' => '*/*'}, :timeout => TIMEOUT_SUBSCRIBE)
+      request.package_response!(response.body)
+
+    rescue Exception => e
+      PUBNUB_LOGGER.debug("publish error: #{e.message}")
+      PUBNUB_LOGGER.debug(e.backtrace)
+      return [0, "Network issue. See log for more details"]
+    end
+
+    request.response
+
+  end
 
   def _request(request, is_reactor_running = false)
     request.format_url!
