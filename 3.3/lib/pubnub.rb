@@ -18,7 +18,6 @@ require 'pubnub_request'
 
 require 'eventmachine'
 require 'em-http-request'
-require 'yajl'
 require 'json'
 require 'uuid'
 require 'active_support/core_ext/hash/indifferent_access'
@@ -305,7 +304,7 @@ class Pubnub
             if req.response_header.http_status.to_i != SUCCESS_RESPONSE
 
               begin
-                server_response = Yajl.load(req.response)
+                server_response = JSON.load(req.response)
                 request.callback.call(server_response)
               rescue => e
                 request.callback.call([0, "Bad server response: #{req.response_header.http_status.to_i}"])

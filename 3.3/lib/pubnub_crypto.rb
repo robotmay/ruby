@@ -1,6 +1,4 @@
 class PubnubCrypto
-  require 'yajl'
-
   def initialize(cipher_key)
     @alg = "AES-256-CBC"
     sha256_key = Digest::SHA256.hexdigest(cipher_key)
@@ -21,7 +19,7 @@ class PubnubCrypto
     aes.key = @key
     aes.iv = @iv
 
-    json_message = Yajl.dump(message)
+    json_message = JSON.dump(message)
     cipher = aes.update(json_message)
     cipher << aes.final
 
@@ -48,6 +46,6 @@ class PubnubCrypto
 
     end
 
-    return Yajl.load(plain_text)
+    return JSON.load(plain_text)
   end
 end
